@@ -8,6 +8,15 @@
 
 /* Begin PBXBuildFile section */
 		5C0A181021179636002F03E0 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0A180F21179636002F03E0 /* main.swift */; };
+		5C0A18192117A317002F03E0 /* libtensorflow.so in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C0A18172117A317002F03E0 /* libtensorflow.so */; };
+		5C0A181A2117A317002F03E0 /* libtensorflow_framework.so in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C0A18182117A317002F03E0 /* libtensorflow_framework.so */; };
+		5C0A18202117A3A8002F03E0 /* PongRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0A181E2117A3A8002F03E0 /* PongRunner.swift */; };
+		5C0A18212117A3A8002F03E0 /* FrozenLakeRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0A181F2117A3A8002F03E0 /* FrozenLakeRunner.swift */; };
+		5C0A18262117A46F002F03E0 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0A18222117A46F002F03E0 /* Model.swift */; };
+		5C0A18272117A46F002F03E0 /* StatsRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0A18232117A46F002F03E0 /* StatsRecorder.swift */; };
+		5C0A18282117A46F002F03E0 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0A18242117A46F002F03E0 /* Utilities.swift */; };
+		5C0A18292117A46F002F03E0 /* Array+NumPy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0A18252117A46F002F03E0 /* Array+NumPy.swift */; };
+		5C0A182B2117AC09002F03E0 /* libpython2.7.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 5C0A182A2117AC09002F03E0 /* libpython2.7.tbd */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +34,16 @@
 /* Begin PBXFileReference section */
 		5C0A180C21179636002F03E0 /* SwiftReinforce */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SwiftReinforce; sourceTree = BUILT_PRODUCTS_DIR; };
 		5C0A180F21179636002F03E0 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		5C0A18172117A317002F03E0 /* libtensorflow.so */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libtensorflow.so; path = "../../../../../../Library/Developer/Toolchains/swift-tensorflow-DEVELOPMENT-2018-07-24-a.xctoolchain/usr/lib/swift/macosx/libtensorflow.so"; sourceTree = "<group>"; };
+		5C0A18182117A317002F03E0 /* libtensorflow_framework.so */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libtensorflow_framework.so; path = "../../../../../../Library/Developer/Toolchains/swift-tensorflow-DEVELOPMENT-2018-07-24-a.xctoolchain/usr/lib/swift/macosx/libtensorflow_framework.so"; sourceTree = "<group>"; };
+		5C0A181B2117A36E002F03E0 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		5C0A181E2117A3A8002F03E0 /* PongRunner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PongRunner.swift; sourceTree = "<group>"; };
+		5C0A181F2117A3A8002F03E0 /* FrozenLakeRunner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrozenLakeRunner.swift; sourceTree = "<group>"; };
+		5C0A18222117A46F002F03E0 /* Model.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
+		5C0A18232117A46F002F03E0 /* StatsRecorder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatsRecorder.swift; sourceTree = "<group>"; };
+		5C0A18242117A46F002F03E0 /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
+		5C0A18252117A46F002F03E0 /* Array+NumPy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Array+NumPy.swift"; sourceTree = "<group>"; };
+		5C0A182A2117AC09002F03E0 /* libpython2.7.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libpython2.7.tbd; path = usr/lib/libpython2.7.tbd; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +51,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5C0A182B2117AC09002F03E0 /* libpython2.7.tbd in Frameworks */,
+				5C0A18192117A317002F03E0 /* libtensorflow.so in Frameworks */,
+				5C0A181A2117A317002F03E0 /* libtensorflow_framework.so in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -41,8 +63,10 @@
 		5C0A180321179636002F03E0 = {
 			isa = PBXGroup;
 			children = (
+				5C0A181B2117A36E002F03E0 /* .gitignore */,
 				5C0A180E21179636002F03E0 /* SwiftReinforce */,
 				5C0A180D21179636002F03E0 /* Products */,
+				5C0A18162117A317002F03E0 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -57,9 +81,41 @@
 		5C0A180E21179636002F03E0 /* SwiftReinforce */ = {
 			isa = PBXGroup;
 			children = (
+				5C0A181D2117A388002F03E0 /* Runner */,
+				5C0A181C2117A380002F03E0 /* Common */,
 				5C0A180F21179636002F03E0 /* main.swift */,
 			);
 			path = SwiftReinforce;
+			sourceTree = "<group>";
+		};
+		5C0A18162117A317002F03E0 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5C0A182A2117AC09002F03E0 /* libpython2.7.tbd */,
+				5C0A18182117A317002F03E0 /* libtensorflow_framework.so */,
+				5C0A18172117A317002F03E0 /* libtensorflow.so */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		5C0A181C2117A380002F03E0 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				5C0A18252117A46F002F03E0 /* Array+NumPy.swift */,
+				5C0A18222117A46F002F03E0 /* Model.swift */,
+				5C0A18232117A46F002F03E0 /* StatsRecorder.swift */,
+				5C0A18242117A46F002F03E0 /* Utilities.swift */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		5C0A181D2117A388002F03E0 /* Runner */ = {
+			isa = PBXGroup;
+			children = (
+				5C0A181F2117A3A8002F03E0 /* FrozenLakeRunner.swift */,
+				5C0A181E2117A3A8002F03E0 /* PongRunner.swift */,
+			);
+			path = Runner;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -119,7 +175,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5C0A18282117A46F002F03E0 /* Utilities.swift in Sources */,
 				5C0A181021179636002F03E0 /* main.swift in Sources */,
+				5C0A18202117A3A8002F03E0 /* PongRunner.swift in Sources */,
+				5C0A18272117A46F002F03E0 /* StatsRecorder.swift in Sources */,
+				5C0A18212117A3A8002F03E0 /* FrozenLakeRunner.swift in Sources */,
+				5C0A18262117A46F002F03E0 /* Model.swift in Sources */,
+				5C0A18292117A46F002F03E0 /* Array+NumPy.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -246,7 +308,9 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 7EHARGJE9N;
+				LD_RUNPATH_SEARCH_PATHS = "/Library/Developer/Toolchains/swift-tensorflow-DEVELOPMENT-2018-07-24-a.xctoolchain/usr/lib/swift/macosx";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 4.2;
 			};
 			name = Debug;
@@ -256,6 +320,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 7EHARGJE9N;
+				LD_RUNPATH_SEARCH_PATHS = "/Library/Developer/Toolchains/swift-tensorflow-DEVELOPMENT-2018-07-24-a.xctoolchain/usr/lib/swift/macosx";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.2;
 			};
