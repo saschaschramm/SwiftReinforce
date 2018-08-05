@@ -10,7 +10,6 @@ import Foundation
 import TensorFlow
 import Python
 
-
 /*
 @inline(never)
 func adjointSoftmax2(tensor: Tensor<Float>,
