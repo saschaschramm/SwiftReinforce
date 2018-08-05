@@ -44,6 +44,7 @@
 		5C0A18242117A46F002F03E0 /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		5C0A18252117A46F002F03E0 /* Array+NumPy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Array+NumPy.swift"; sourceTree = "<group>"; };
 		5C0A182A2117AC09002F03E0 /* libpython2.7.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libpython2.7.tbd; path = usr/lib/libpython2.7.tbd; sourceTree = SDKROOT; };
+		5C7C42E52117B44C00BAB61F /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +64,7 @@
 		5C0A180321179636002F03E0 = {
 			isa = PBXGroup;
 			children = (
+				5C7C42E52117B44C00BAB61F /* README.md */,
 				5C0A181B2117A36E002F03E0 /* .gitignore */,
 				5C0A180E21179636002F03E0 /* SwiftReinforce */,
 				5C0A180D21179636002F03E0 /* Products */,
