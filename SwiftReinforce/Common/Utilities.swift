@@ -55,7 +55,6 @@ func discount(rewards: [Float], dones: [Bool], discountRate: Float) -> [Float] {
 func renderPixels(_ pixels: [UInt8], rows: Int, cols: Int) {
     let sys = Python.import("sys")
     let np = Python.import("numpy")
-    
     let path = "\(NSHomeDirectory())/gym/lib/python2.7/site-packages/"
     sys.path.append(path)
     let image = Python.import("PIL.Image")
