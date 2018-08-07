@@ -97,8 +97,6 @@ struct Model {
         let rewardsTensor = Tensor<Float>(rewards)
         
         let losses = rewardsTensor * selectedLogActionProbsSum
-        //print("losses \(losses)")
-
         let loss = losses.mean(alongAxes: 0)
         
         let d6 = Tensor<Float>(Float(1)/Float(batchSize))
