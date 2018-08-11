@@ -37,14 +37,15 @@ func adjointSoftmax(_ x: Tensor<Float>, seed: Tensor<Float>) -> Tensor<Float> {
     return (jacobianTensor * seed.expandingShape(at: 1)).sum(squeezingAxes: 2)
 }
 
-struct Model {
+struct Model: Parameterized {
     var learningRate: Float
     var observationSpace: Int32
     var actionSpace: Int32
     var meanGradient1: Tensor<Float>
     var meanGradient2: Tensor<Float>
-    var weights1: Tensor<Float>
-    var weights2: Tensor<Float>
+    @TFParameter var weights1: Tensor<Float>
+    @TFParameter var weights2: Tensor<Float>
+    
     let decay: Float = 0.90
     var optimizer: Optimizer
     
@@ -63,13 +64,13 @@ struct Model {
         self.weights2 = Tensor<Float>(randomUniform: [hiddenUnits, actionSpace])/sqrtf(Float(observationSpace))
         self.optimizer = optimizer
     }
-
+    
     @inline(never)
     mutating func train(observations: [Int32], actions: [Int32], rewards: [Float], batchSize: Int) {
         let observationsTensor = Tensor<Float>(oneHotAtIndices: Tensor(observations), depth: observationSpace)
         train(observations: observationsTensor, actions: actions, rewards: rewards, batchSize: batchSize)
     }
-
+    
     @inline(never)
     mutating func train(observations: [Float], actions: [Int32], rewards: [Float], batchSize: Int) {
         let observationsTensor = Tensor<Float>(
@@ -84,7 +85,7 @@ struct Model {
                         actions: [Int32],
                         rewards: [Float],
                         batchSize: Int){
-
+        
         let output1 = matmul(observations, weights1)
         let reluOutput = relu(output1)
         let output2 = matmul(reluOutput, weights2)
@@ -106,7 +107,7 @@ struct Model {
         )
         
         let d4 = Tensor<Float>(1) * d5
-    
+        
         let (_, d3) = #adjoint(Tensor.*)(
             actionMask, logActionProbs, originalValue: selectedLogActionProbs, seed: d4
         )
@@ -131,25 +132,28 @@ struct Model {
             observations, weights1, originalValue: output1, seed: dOutput1
         )
     
+        let gradients = Parameters(weights1: dWeights1, weights2: dWeights2)
         if optimizer == Optimizer.GradientDescent {
-            applyGradientDescent(dWeights1: dWeights1, dWeights2: dWeights2)
+            applyGradientDescent(gradients)
         } else if optimizer == Optimizer.RMSProb {
-            applyRMSProb(dWeights1: dWeights1, dWeights2: dWeights2)
+            applyRMSProb(gradients)
         }
     }
     
     @inline(never)
-    mutating func applyGradientDescent(dWeights1: Tensor<Float>, dWeights2: Tensor<Float>) {
-        weights1 += learningRate * dWeights1
-        weights2 += learningRate * dWeights2
+    mutating func applyGradientDescent(_ gradients: Parameters) {
+        let learningRate = self.learningRate
+        allParameters.update(withGradients: gradients) { parameter, gradient in
+            parameter += gradient * learningRate
+        }
     }
     
     @inline(never)
-    mutating func applyRMSProb(dWeights1: Tensor<Float>, dWeights2: Tensor<Float>) {
-        meanGradient1 = decay * meanGradient1 + (1 - decay) * (pow(dWeights1,2))
-        weights1 += learningRate * dWeights1 / (sqrt(meanGradient1) + 1e-10)
-        meanGradient2 = decay * meanGradient2 + (1 - decay) * (pow(dWeights2,2))
-        weights2 += learningRate * dWeights2 / (sqrt(meanGradient2) + 1e-10)
+    mutating func applyRMSProb(_ gradients: Parameters) {
+        meanGradient1 = decay * meanGradient1 + (1 - decay) * (pow(gradients.weights1,2))
+        weights1 += learningRate * gradients.weights1 / (sqrt(meanGradient1) + 1e-10)
+        meanGradient2 = decay * meanGradient2 + (1 - decay) * (pow(gradients.weights2,2))
+        weights2 += learningRate * gradients.weights2 / (sqrt(meanGradient2) + 1e-10)
     }
     
     @inline(never)
@@ -165,7 +169,7 @@ struct Model {
         let observationsTensor = Tensor<Float>(oneHotAtIndices: Tensor([observation]), depth: observationSpace)
         return predictAction(observationsTensor)
     }
-
+    
     @inline(never)
     func predictAction(_ observation: Tensor<Float>) -> Int32 {
         let output1 = matmul(observation, weights1)
@@ -177,5 +181,3 @@ struct Model {
         return action
     }
 }
-
-
