@@ -6,7 +6,6 @@
 //  Copyright © 2018 Sascha Schramm. All rights reserved.
 //
 
-
 import Python
 
 extension Array where Element == UInt8 {

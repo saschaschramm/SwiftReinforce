@@ -16,7 +16,6 @@ struct StatsRecorder {
     var numEpisodes = 0
     var startTime: DispatchTime!
 
-
     init(summaryFrequency: Int, performanceNumEpisodes: Int) {
         self.summaryFrequency = summaryFrequency
         self.performanceNumEpisodes = performanceNumEpisodes
