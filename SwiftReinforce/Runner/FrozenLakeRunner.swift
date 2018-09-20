@@ -12,7 +12,7 @@ import TensorFlow
 
 class FrozenLakeRunner {
     var timesteps: Int
-    var network: Model
+    var model: Model
     var statsRecorder: StatsRecorder
     var discountRate: Float
     var env: PythonObject
@@ -35,7 +35,7 @@ class FrozenLakeRunner {
                                       performanceNumEpisodes: performanceNumEpisodes)
         
         self.timesteps = timesteps
-        network = Model(observationSpace: Int32(observationSpace),
+        model = Model(observationSpace: Int32(observationSpace),
                                     actionSpace: Int32(actionSpace),
                                     learningRate: learningRate,
                                     hiddenUnits:128,
@@ -49,37 +49,38 @@ class FrozenLakeRunner {
         var observations: [Int32] = []
         var rewards: [Float] = []
         var actions: [Int32] = []
-        var dones: [Bool] = []
+        var terminals: [Bool] = []
         var observation = Int32(env.reset())!
         
         for t in 0 ..< timesteps+1 {
             observations.append(observation)
-            let action = network.predictAction(observation)
+            let action = model.predictAction(observation)
            
             let next_step = env.step(action)
             observation = Int32(next_step[0])!
             let reward = Float(next_step[1])!
-            let done = Bool(next_step[2])!
-            
-            statsRecorder.afterStep(reward: Double(reward), done: done, t: t)
+            let terminal = Bool(next_step[2])!
+            statsRecorder.afterStep(reward: Double(reward), terminal: terminal, t: t)
             rewards.append(reward)
             actions.append(action)
-            dones.append(done)
+            terminals.append(terminal)
             
             if t % batchSize == 0 && t > 0 {
-                let discountedRewards = discount(rewards: rewards, dones: dones, discountRate: discountRate)
+                let discountedRewards = discount(rewards: rewards,
+                                                 terminals: terminals,
+                                                 discountRate: discountRate)
                                 
-                network.train(observations: observations,
+                model.train(observations: observations,
                               actions: actions,
                               rewards: discountedRewards,
                               batchSize: rewards.count)
                 rewards = []
                 observations = []
                 actions = []
-                dones = []
+                terminals = []
             }
             
-            if done {
+            if terminal {
                 observation = Int32(env.reset())!
             }
         }

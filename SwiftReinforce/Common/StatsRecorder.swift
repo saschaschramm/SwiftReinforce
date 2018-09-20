@@ -30,10 +30,10 @@ struct StatsRecorder {
         startTime = endTime
     }
     
-    mutating func afterStep(reward: Double, done: Bool, t: Int) {
+    mutating func afterStep(reward: Double, terminal: Bool, t: Int) {
         totalReward += reward
         
-        if done {
+        if terminal {
             numEpisodes += 1
             totalRewards.append(totalReward)
             totalReward = 0

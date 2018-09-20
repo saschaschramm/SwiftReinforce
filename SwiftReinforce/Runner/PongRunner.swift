@@ -11,7 +11,7 @@ import Foundation
 import TensorFlow
 
 class PongRunner {
-    var env: PythonObject
+    var env: EnvWrapper
     var batchSize: Int
     var discountRate: Float
     var observationSpace: Int32
@@ -21,20 +21,7 @@ class PongRunner {
     var summaryFrequency: Int
     var performanceNumEpisodes: Int
     
-    func transform(_ column: UInt8) -> Float {
-        switch column {
-        case 144:
-            return 0
-        case 109:
-            return 0
-        case 0:
-            return 0
-        default:
-            return 1
-        }
-    }
-    
-    init(env: PythonObject,
+    init(env: EnvWrapper,
          observationSpace: Int32,
          actionSpace: Int32,
          timesteps: Int,
@@ -54,74 +41,51 @@ class PongRunner {
         self.batchSize = batchSize
     }
     
-    func preprocess(_ step: PythonObject) -> [Float] {
-        let numpyArray: PythonObject = step[35..<195]
-        let observation: [UInt8] = Array<UInt8>(numpyArray: numpyArray)!
-        
-        var preprocessedImage = [Float](repeating: 0, count: 80 * 80)
-        for i in stride(from: 0, to: 160, by: 2) {
-            for j in stride(from: 0, to: 160, by: 2) {
-                let index = (i * 160 + j)
-                let oldIndex = index * 3
-                let newIndex = i/2 * 80 + j/2
-                preprocessedImage[newIndex] = transform(observation[oldIndex])
-            }
-        }
-        return preprocessedImage
-    }
-    
     func run() {
         var observations: [[Float]] = []
         var rewards: [Float] = []
         var actions: [Int32] = []
-        var dones: [Bool] = []
-        
-        var observation: PythonObject = env.reset()
+        var terminals: [Bool] = []
+        var observation: [Float] = env.reset()
         var statsRecorder = StatsRecorder(summaryFrequency: summaryFrequency,
-                                      performanceNumEpisodes: performanceNumEpisodes)
+                                          performanceNumEpisodes: performanceNumEpisodes)
         
-        var network = Model(observationSpace:observationSpace,
-                                  actionSpace: actionSpace,
-                                  learningRate: learningRate,
-                                  hiddenUnits: 256,
-                                  optimizer: .RMSProb)
+        var model = Model(observationSpace:observationSpace,
+                            actionSpace: actionSpace,
+                            learningRate: learningRate,
+                            hiddenUnits: 256,
+                            optimizer: .RMSProb)
         
-        for t in 0 ..< timesteps + 1 {            
-            observations.append(preprocess(observation))
-            let actionIndex = network.predictAction(observations.last!)
-            var action: Int32 = 0
-            
-            if actionIndex == 0 {
-                action = 2
-            } else if actionIndex == 1 {
-                action = 3
-            }
-            
-            let step = env.step(action)
-            observation = step[0]
-            let done = Bool(step[2])!
-            let reward = Float(step[1])!
-            
-            statsRecorder.afterStep(reward: Double(reward), done: done, t: t)
+        for t in 0 ..< timesteps + 1 {
+            observations.append(observation)
+            let actionIndex = model.predictAction(observations.last!)
+            let step = env.step(actionIndex)
+            observation = step.observation
+            let reward = step.reward
+            let terminal = step.terminal
+
+            statsRecorder.afterStep(reward: Double(reward), terminal: terminal, t: t)
             rewards.append(reward)
-            dones.append(done)
+            terminals.append(terminal)
             actions.append(actionIndex)
-    
-            if t % batchSize == 0 && t > 0 {
-                let discountedRewards = discount(rewards: rewards, dones: dones, discountRate: discountRate)
-                                
-                network.train(observations: observations.flatMap({$0}),
+            
+            if (t % batchSize == 0) && (t > 0) {
+                let discountedRewards = discount(rewards: rewards,
+                                                 terminals: terminals,
+                                                 discountRate: discountRate)
+                
+                model.train(observations: observations.flatMap({$0}),
                               actions: actions,
                               rewards: discountedRewards,
                               batchSize: rewards.count
-                            )
+                )
                 rewards = []
                 observations = []
                 actions = []
-                dones = []
+                terminals = []
             }
             
-            if done {
+            if terminal {
                 observation = env.reset()
             }
         }

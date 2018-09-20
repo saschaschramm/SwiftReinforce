@@ -10,7 +10,6 @@ import Foundation
 import TensorFlow
 import Python
 
-RandomState.global.seed(with: 0)
 
 func runFrozenLake() {
     let gym = Python.import("gym")
@@ -39,14 +38,7 @@ func runFrozenLake() {
 }
 
 func runPong() {
-    let gym = Python.import("gym")
-    let sys = Python.import("sys")
-    
-    let path = "\(NSHomeDirectory())/gym/lib/python2.7/site-packages/"
-    sys.path.append(path)
-    
-    let env = gym.make("Pong-v4")
-    env.seed(0)
+    let env = EnvWrapper()
     let runner = PongRunner(env: env,
                             observationSpace: 80 * 80,
                             actionSpace: 2,
@@ -60,8 +52,10 @@ func runPong() {
 }
 
 func main() {
-    runFrozenLake()
-    //runPong()
+    //runFrozenLake()
+    runPong()
+
 }
 
 main()
+

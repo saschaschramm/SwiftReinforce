@@ -38,11 +38,11 @@ func adjointSoftmax2(tensor: Tensor<Float>,
     return jacobianTensor * seed.expandingShape(at: 1)
 }*/
 
-func discount(rewards: [Float], dones: [Bool], discountRate: Float) -> [Float] {
+func discount(rewards: [Float], terminals: [Bool], discountRate: Float) -> [Float] {
     var discounted: [Float] = []
     var totalReturn: Float = 0.0
-    for (reward, done) in zip(rewards.reversed(), dones.reversed()) {
-        if done {
+    for (reward, terminal) in zip(rewards.reversed(), terminals.reversed()) {
+        if terminal {
             totalReturn = reward
         } else {
             totalReturn = reward + discountRate * totalReturn
@@ -57,10 +57,8 @@ func renderPixels(_ pixels: [UInt8], rows: Int, cols: Int) {
     let np = Python.import("numpy")
     let path = "\(NSHomeDirectory())/gym/lib/python2.7/site-packages/"
     sys.path.append(path)
-    let image = Python.import("PIL.Image")
-    
-    let foo = np.array(pixels).reshape([rows,cols])
-    let img = image.fromarray(np.uint8(foo))
+    let image = Python.import("PIL.Image")    
+    let img = image.fromarray(np.uint8(np.array(pixels).reshape([rows,cols])))
     img.show()
 }
 

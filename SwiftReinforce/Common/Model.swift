@@ -14,6 +14,8 @@ enum Optimizer {
     case GradientDescent
 }
 
+var generator = ARC4RandomNumberGenerator(seed: 0)
+
 func adjointSoftmax(_ x: Tensor<Float>, seed: Tensor<Float>) -> Tensor<Float> {
     let batchSize = Int(x.shape[0])
     let size = Int(x.shape[1])
@@ -46,7 +48,7 @@ struct Model {
     var weights1: Tensor<Float>
     var weights2: Tensor<Float>
     
-    let decay: Float = 0.90
+    let decay: Float = 0.99
     var optimizer: Optimizer
     
     init(observationSpace: Int32,
@@ -55,20 +57,20 @@ struct Model {
          hiddenUnits: Int32,
          optimizer: Optimizer
         ) {
-    
+        
         self.learningRate = learningRate
         self.actionSpace = actionSpace
         self.observationSpace = observationSpace
         self.meanGradient1 = Tensor<Float>(zeros: [observationSpace, hiddenUnits])
         self.meanGradient2 = Tensor<Float>(zeros: [hiddenUnits, actionSpace])
-        self.weights1 = Tensor<Float>(randomUniform: [observationSpace, hiddenUnits])/sqrtf(Float(observationSpace))
-        self.weights2 = Tensor<Float>(randomUniform: [hiddenUnits, actionSpace])/sqrtf(Float(observationSpace))
+        self.weights1 = Tensor<Float>(randomUniform: [observationSpace, hiddenUnits], generator: &generator)/sqrtf(Float(observationSpace))
+        self.weights2 = Tensor<Float>(randomUniform: [hiddenUnits, actionSpace], generator: &generator)/sqrtf(Float(observationSpace))
         self.optimizer = optimizer
     }
     
     mutating func train(observations: [Int32], actions: [Int32], rewards: [Float], batchSize: Int) {
-       let observationsTensor = Tensor<Float>(oneHotAtIndices: Tensor(observations), depth: observationSpace)
-       train(observations: observationsTensor, actions: actions, rewards: rewards, batchSize: batchSize)
+        let observationsTensor = Tensor<Float>(oneHotAtIndices: Tensor(observations), depth: observationSpace)
+        train(observations: observationsTensor, actions: actions, rewards: rewards, batchSize: batchSize)
     }
     
     mutating func train(observations: [Float], actions: [Int32], rewards: [Float], batchSize: Int) {
@@ -164,7 +166,7 @@ struct Model {
         let reluOutput = relu(output1)
         let output = matmul(reluOutput, weights2)
         let actionProbs = softmax(output, alongAxis: 1)
-        let scaledRandomUniform = log(Tensor<Float>(randomUniform: actionProbs.shape))/actionProbs
+        let scaledRandomUniform = log(Tensor<Float>(randomUniform: actionProbs.shape, generator: &generator))/actionProbs
         let action = scaledRandomUniform.argmax()
         return action
     }
