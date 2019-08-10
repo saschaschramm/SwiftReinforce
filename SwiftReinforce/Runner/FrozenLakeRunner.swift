@@ -2,8 +2,8 @@
 //  FrozenLakeRunner.swift
 //  SwiftReinforce
 //
-//  Created by Sascha Schramm on 08.07.18.
-//  Copyright © 2018 Sascha Schramm. All rights reserved.
+//  Created by Sascha Schramm on 10.08.19.
+//  Copyright © 2019 Sascha Schramm. All rights reserved.
 //
 
 import Foundation
@@ -12,16 +12,14 @@ import TensorFlow
 
 class FrozenLakeRunner {
     var timesteps: Int
-    var model: Model
     var statsRecorder: StatsRecorder
     var discountRate: Float
     var env: PythonObject
-    var batchSize: Int
-    var observationSpace: Int32
+    var reinforce: Reinforce
     
     init(env: PythonObject,
-         observationSpace: Int32,
-         actionSpace: Int32,
+         observationSpace: Int,
+         actionSpace: Int,
          timesteps: Int,
          learningRate: Float,
          discountRate: Float,
@@ -29,20 +27,22 @@ class FrozenLakeRunner {
          performanceNumEpisodes: Int,
          batchSize: Int
         ) {
-        
         self.discountRate = discountRate
         statsRecorder = StatsRecorder(summaryFrequency: summaryFrequency,
                                       performanceNumEpisodes: performanceNumEpisodes)
-        
         self.timesteps = timesteps
-        model = Model(observationSpace: Int32(observationSpace),
-                                    actionSpace: Int32(actionSpace),
-                                    learningRate: learningRate,
-                                    hiddenUnits:128,
-                                    optimizer: .GradientDescent)
         self.env = env
-        self.batchSize = batchSize
-        self.observationSpace = observationSpace
+        
+        let model = Model(inputSize: observationSpace,
+                          hiddenSize: 128,
+                          outputSize: actionSpace)
+        
+        self.reinforce = Reinforce(batchSize: batchSize,
+                                   observationSpace: observationSpace,
+                                   actionSpace: actionSpace,
+                                   model: model,
+                                   optimizer: SGD(for: model, learningRate: learningRate)
+        )
     }
     
     func run() {
@@ -54,26 +54,23 @@ class FrozenLakeRunner {
         
         for t in 0 ..< timesteps+1 {
             observations.append(observation)
-            let action = model.predictAction(observation)
-           
-            let next_step = env.step(action)
-            observation = Int32(next_step[0])!
-            let reward = Float(next_step[1])!
-            let terminal = Bool(next_step[2])!
+            
+            let action = reinforce.predict(Int32(observation))
+            let nextStep = env.step(action)
+            observation = Int32(nextStep[0])!
+            let reward = Float(nextStep[1])!
+            let terminal = Bool(nextStep[2])!
             statsRecorder.afterStep(reward: Double(reward), terminal: terminal, t: t)
             rewards.append(reward)
             actions.append(action)
             terminals.append(terminal)
             
-            if t % batchSize == 0 && t > 0 {
+            if observations.count == reinforce.batchSize {
                 let discountedRewards = discount(rewards: rewards,
                                                  terminals: terminals,
                                                  discountRate: discountRate)
-                                
-                model.train(observations: observations,
-                              actions: actions,
-                              rewards: discountedRewards,
-                              batchSize: rewards.count)
+                
+                reinforce.computeGradients(observations: observations, rewards: discountedRewards, actions: actions)
                 rewards = []
                 observations = []
                 actions = []

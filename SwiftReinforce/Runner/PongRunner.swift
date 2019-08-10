@@ -2,8 +2,8 @@
 //  PongRunner.swift
 //  SwiftReinforce
 //
-//  Created by Sascha Schramm on 09.07.18.
-//  Copyright © 2018 Sascha Schramm. All rights reserved.
+//  Created by Sascha Schramm on 10.08.19.
+//  Copyright © 2019 Sascha Schramm. All rights reserved.
 //
 
 import Python
@@ -12,18 +12,15 @@ import TensorFlow
 
 class PongRunner {
     var env: EnvWrapper
-    var batchSize: Int
     var discountRate: Float
-    var observationSpace: Int32
-    var actionSpace: Int32
-    var learningRate: Float
     var timesteps: Int
     var summaryFrequency: Int
     var performanceNumEpisodes: Int
+    var reinforce: Reinforce
     
     init(env: EnvWrapper,
-         observationSpace: Int32,
-         actionSpace: Int32,
+         observationSpace: Int,
+         actionSpace: Int,
          timesteps: Int,
          learningRate: Float,
          discountRate: Float,
@@ -31,14 +28,21 @@ class PongRunner {
          performanceNumEpisodes: Int,
          batchSize: Int) {
         self.env = env
-        self.observationSpace = observationSpace
-        self.actionSpace = actionSpace
         self.timesteps = timesteps
-        self.learningRate = learningRate
         self.discountRate = discountRate
         self.summaryFrequency = summaryFrequency
         self.performanceNumEpisodes = performanceNumEpisodes
-        self.batchSize = batchSize
+        
+        let model = Model(inputSize: observationSpace,
+                          hiddenSize: 256,
+                          outputSize: actionSpace)
+        
+        let optimizer = RMSProp(for: model, learningRate: learningRate)
+        self.reinforce = Reinforce(batchSize: batchSize,
+                                   observationSpace: observationSpace,
+                                   actionSpace: actionSpace,
+                                   model: model,
+                                   optimizer: optimizer)
     }
     
     func run() {
@@ -50,35 +54,25 @@ class PongRunner {
         var statsRecorder = StatsRecorder(summaryFrequency: summaryFrequency,
                                           performanceNumEpisodes: performanceNumEpisodes)
         
-        var model = Model(observationSpace:observationSpace,
-                            actionSpace: actionSpace,
-                            learningRate: learningRate,
-                            hiddenUnits: 256,
-                            optimizer: .RMSProb)
-        
         for t in 0 ..< timesteps + 1 {
             observations.append(observation)
-            let actionIndex = model.predictAction(observations.last!)
+            let actionIndex = reinforce.predict(observation)
+            
             let step = env.step(actionIndex)
             observation = step.observation
             let reward = step.reward
             let terminal = step.terminal
-
+            
             statsRecorder.afterStep(reward: Double(reward), terminal: terminal, t: t)
             rewards.append(reward)
             terminals.append(terminal)
             actions.append(actionIndex)
             
-            if (t % batchSize == 0) && (t > 0) {
+            if observations.count == reinforce.batchSize {
                 let discountedRewards = discount(rewards: rewards,
                                                  terminals: terminals,
                                                  discountRate: discountRate)
-                
-                model.train(observations: observations.flatMap({$0}),
-                              actions: actions,
-                              rewards: discountedRewards,
-                              batchSize: rewards.count
-                )
+                reinforce.computeGradients(observations: observations.flatMap({$0}), rewards: discountedRewards, actions: actions)
                 rewards = []
                 observations = []
                 actions = []

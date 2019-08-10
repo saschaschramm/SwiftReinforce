@@ -10,9 +10,22 @@ import Foundation
 import TensorFlow
 import Python
 
+func runPong() {
+    let env = EnvWrapper()
+    let runner = PongRunner(env: env,
+                            observationSpace: 80 * 80,
+                            actionSpace: 2,
+                            timesteps: Int(1e6),
+                            learningRate: 0.0002,
+                            discountRate: 0.99,
+                            summaryFrequency: 40000,
+                            performanceNumEpisodes: 10,
+                            batchSize: 128)
+    runner.run()
+}
 
 func runFrozenLake() {
-    let gym = Python.import("gym")
+    let gym = importGym()
     gym.envs.registration.register(id:"FrozenLakeNotSlippery-v0",
                                    entry_point:"gym.envs.toy_text:FrozenLakeEnv",
                                    kwargs: ["is_slippery": false])
@@ -37,24 +50,9 @@ func runFrozenLake() {
     print(time)
 }
 
-func runPong() {
-    let env = EnvWrapper()
-    let runner = PongRunner(env: env,
-                            observationSpace: 80 * 80,
-                            actionSpace: 2,
-                            timesteps: Int(1e6),
-                            learningRate: 0.0002,
-                            discountRate: 0.99,
-                            summaryFrequency: 40000,
-                            performanceNumEpisodes: 10,
-                            batchSize: 128)
-    runner.run()
-}
-
 func main() {
-    //runFrozenLake()
-    runPong()
-
+    runFrozenLake()
+    //runPong()
 }
 
 main()

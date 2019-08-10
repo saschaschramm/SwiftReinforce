@@ -2,12 +2,13 @@
 //  EnvWrapper.swift
 //  SwiftReinforce
 //
-//  Created by Sascha Schramm on 19.09.18.
-//  Copyright © 2018 Sascha Schramm. All rights reserved.
+//  Created by Sascha Schramm on 10.08.19.
+//  Copyright © 2019 Sascha Schramm. All rights reserved.
 //
 
 import Foundation
 import Python
+import TensorFlow
 
 enum Pixel: Int {
     case player = 92
@@ -18,7 +19,6 @@ enum Pixel: Int {
 func preprocess(_ step: PythonObject) -> [Float] {
     let numpyArray: PythonObject = step[35..<195]
     let observation: [UInt8] = Array<UInt8>(numpyArray: numpyArray)!
-    
     var preprocessedImage = [Float](repeating: 0, count: 80 * 80)
     for i in stride(from: 0, to: 160, by: 2) {
         for j in stride(from: 0, to: 160, by: 2) {
@@ -45,12 +45,7 @@ class EnvWrapper {
     var observationBuffer: [[Float]]!
     
     init() {
-        let gym = Python.import("gym")
-        let sys = Python.import("sys")
-        
-        let path = "\(NSHomeDirectory())/gym/lib/python2.7/site-packages/"
-        sys.path.append(path)
-        
+        let gym = importGym()
         env = gym.make("PongNoFrameskip-v4")
         env.seed(0)
         
