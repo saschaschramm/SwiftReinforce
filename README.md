@@ -15,7 +15,7 @@ Take the following steps to install OpenAI Gym using Virtualenv:
 
 1. System wide install
 ```
-sudo pip install -U virtualenv
+sudo pip3 install -U virtualenv
 ```
 
 2. Create a Virtualenv environment:
@@ -31,12 +31,13 @@ source ./bin/activate
 
 4. Install OpenAI Gym into the active Virtualenv:
 ```
-pip install gym[atari]
+pip3 install gym
+pip3 install gym[atari]
 ```
 
 ## Requirements
-* Xcode 10.1 or later
-* Swift for TensorFlow 2018-10-17
+* Xcode 11.0 or later
+* Swift for TensorFlow 2019-07-25
 
 ## Results
 ### FrozenLake
