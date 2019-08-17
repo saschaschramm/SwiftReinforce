@@ -28,19 +28,19 @@ struct Model: Layer {
     }
 }
 
-class Reinforce {
+class Reinforce<Optimizer: TensorFlow.Optimizer> where Optimizer.Model == Model {
     let batchSize: Int
     let actionSpace: Int
     let observationSpace: Int
     var model: Model
-    var optimizer: AnyObject!
+    var optimizer: Optimizer
     
-    init(batchSize: Int, observationSpace: Int, actionSpace: Int, model: Model, optimizer: AnyObject) {
+    init(batchSize: Int, observationSpace: Int, actionSpace: Int, model: Model, optimizer: Optimizer) {
         self.batchSize = batchSize
         self.observationSpace = observationSpace
         self.actionSpace = actionSpace
-        self.optimizer = optimizer
         self.model = model
+        self.optimizer = optimizer
     }
     
     private func sample(_ probs: Tensor<Float>) -> Int32 {
@@ -63,7 +63,7 @@ class Reinforce {
         return sample(probs)
     }
     
-    private func compute(observationTensor: Tensor<Float>, rewards: [Float], actions: [Int32]) {
+    public func update(observationTensor: Tensor<Float>, rewards: [Float], actions: [Int32]) {
         Context.local.learningPhase = .training
         let gradients = model.gradient { model -> Tensor<Float> in
             let rewardsTensor = Tensor<Float>(shape: [self.batchSize, 1], scalars:rewards)
@@ -74,23 +74,16 @@ class Reinforce {
             let loss = -losses.mean()
             return loss
         }
-        
-        if let optimizerSGD = optimizer as? SGD<Model> {
-            optimizerSGD.update(&model.allDifferentiableVariables, along: gradients)
-        } else if let optimizerRMSProb = optimizer as? RMSProp<Model> {
-            optimizerRMSProb.update(&model.allDifferentiableVariables, along: gradients)
-        } else {
-            assertionFailure("Optimizer not implemented")
-        }
+        optimizer.update(&model.allDifferentiableVariables, along: gradients)
     }
     
-    func computeGradients(observations: [Int32], rewards: [Float], actions: [Int32]) {
+    func train(observations: [Int32], rewards: [Float], actions: [Int32]) {
         let observationTensor = Tensor<Float>(oneHotAtIndices: Tensor(observations), depth: observationSpace)
-        compute(observationTensor: observationTensor, rewards: rewards, actions: actions)
+        update(observationTensor: observationTensor, rewards: rewards, actions: actions)
     }
     
-    func computeGradients(observations: [Float], rewards: [Float], actions: [Int32]) {
+    func train(observations: [Float], rewards: [Float], actions: [Int32]) {
         let observationTensor = Tensor<Float>(shape: [self.batchSize, self.observationSpace], scalars:observations)
-        compute(observationTensor: observationTensor, rewards: rewards, actions: actions)
+        update(observationTensor: observationTensor, rewards: rewards, actions: actions)
     }
 }

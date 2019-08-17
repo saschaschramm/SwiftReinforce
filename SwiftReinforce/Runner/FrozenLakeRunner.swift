@@ -15,7 +15,7 @@ class FrozenLakeRunner {
     var statsRecorder: StatsRecorder
     var discountRate: Float
     var env: PythonObject
-    var reinforce: Reinforce
+    var reinforce: Reinforce<SGD<Model>>
     
     init(env: PythonObject,
          observationSpace: Int,
@@ -41,8 +41,7 @@ class FrozenLakeRunner {
                                    observationSpace: observationSpace,
                                    actionSpace: actionSpace,
                                    model: model,
-                                   optimizer: SGD(for: model, learningRate: learningRate)
-        )
+                                   optimizer: SGD(for: model, learningRate: learningRate))
     }
     
     func run() {
@@ -70,7 +69,7 @@ class FrozenLakeRunner {
                                                  terminals: terminals,
                                                  discountRate: discountRate)
                 
-                reinforce.computeGradients(observations: observations, rewards: discountedRewards, actions: actions)
+                reinforce.train(observations: observations, rewards: discountedRewards, actions: actions)
                 rewards = []
                 observations = []
                 actions = []

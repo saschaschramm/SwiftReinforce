@@ -16,7 +16,7 @@ class PongRunner {
     var timesteps: Int
     var summaryFrequency: Int
     var performanceNumEpisodes: Int
-    var reinforce: Reinforce
+    var reinforce: Reinforce<RMSProp<Model>>!
     
     init(env: EnvWrapper,
          observationSpace: Int,
@@ -37,12 +37,11 @@ class PongRunner {
                           hiddenSize: 256,
                           outputSize: actionSpace)
         
-        let optimizer = RMSProp(for: model, learningRate: learningRate)
         self.reinforce = Reinforce(batchSize: batchSize,
                                    observationSpace: observationSpace,
                                    actionSpace: actionSpace,
                                    model: model,
-                                   optimizer: optimizer)
+                                   optimizer: RMSProp(for: model, learningRate: learningRate))
     }
     
     func run() {
@@ -72,7 +71,7 @@ class PongRunner {
                 let discountedRewards = discount(rewards: rewards,
                                                  terminals: terminals,
                                                  discountRate: discountRate)
-                reinforce.computeGradients(observations: observations.flatMap({$0}), rewards: discountedRewards, actions: actions)
+                reinforce.train(observations: observations.flatMap({$0}), rewards: discountedRewards, actions: actions)
                 rewards = []
                 observations = []
                 actions = []

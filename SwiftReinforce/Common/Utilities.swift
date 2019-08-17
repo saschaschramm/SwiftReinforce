@@ -18,6 +18,7 @@ func importGym() -> PythonObject {
     return Python.import("gym")
 }
 
+/*
 func renderPixels(_ pixels: [UInt8], rows: Int, cols: Int) {
     let sys = Python.import("sys")
     let np = Python.import("numpy")
@@ -26,7 +27,7 @@ func renderPixels(_ pixels: [UInt8], rows: Int, cols: Int) {
     let image = Python.import("PIL.Image")
     let img = image.fromarray(np.uint8(np.array(pixels).reshape([rows,cols])))
     img.show()
-}
+}*/
 
 func discount(rewards: [Float], terminals: [Bool], discountRate: Float) -> [Float] {
     var discounted: [Float] = []

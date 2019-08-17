@@ -51,8 +51,8 @@ func runFrozenLake() {
 }
 
 func main() {
-    runFrozenLake()
-    //runPong()
+    //runFrozenLake()
+    runPong()
 }
 
 main()
