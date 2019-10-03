@@ -51,8 +51,9 @@ func runFrozenLake() {
 }
 
 func main() {
-    //runFrozenLake()
-    runPong()
+    Context.local.randomSeed = (0, 0)
+    runFrozenLake()
+    //runPong()
 }
 
 main()

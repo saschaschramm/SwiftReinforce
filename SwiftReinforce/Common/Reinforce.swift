@@ -18,8 +18,8 @@ struct Model: Layer {
     var layer1: Dense<Float>
     var layer2: Dense<Float>
     init(inputSize: Int, hiddenSize: Int, outputSize: Int) {
-        layer1 = Dense<Float>(inputSize: inputSize, outputSize: hiddenSize,  activation: relu, generator: &generator)
-        layer2 = Dense<Float>(inputSize: hiddenSize, outputSize: outputSize, activation: softmax, generator: &generator)
+        layer1 = Dense<Float>(inputSize: inputSize, outputSize: hiddenSize,  activation: relu)
+        layer2 = Dense<Float>(inputSize: hiddenSize, outputSize: outputSize, activation: softmax)
     }
     
     @differentiable
@@ -44,7 +44,7 @@ class Reinforce<Optimizer: TensorFlow.Optimizer> where Optimizer.Model == Model 
     }
     
     private func sample(_ probs: Tensor<Float>) -> Int32 {
-        let randomUniform = Tensor<Float>(randomUniform: probs.shape, generator: &generator)
+        let randomUniform = Tensor<Float>(randomUniform: probs.shape)
         let scaledRandomUniform = log(randomUniform) / probs
         return scaledRandomUniform.argmax(squeezingAxis: 1).scalarized()
     }
@@ -74,7 +74,7 @@ class Reinforce<Optimizer: TensorFlow.Optimizer> where Optimizer.Model == Model 
             let loss = -losses.mean()
             return loss
         }
-        optimizer.update(&model.allDifferentiableVariables, along: gradients)
+        optimizer.update(&model, along: gradients)
     }
     
     func train(observations: [Int32], rewards: [Float], actions: [Int32]) {
